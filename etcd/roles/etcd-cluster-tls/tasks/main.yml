@@ -1,9 +1,20 @@
+- name: create etcd user
+  become: true
+  user:
+    name: etcd
+    system: yes
+    shell: /bin/false
+    home: /var/lib/etcd
+    create_home: no
+  tags: [ add_service ]
+
 - name: create a data directory
+  become: true
   file:
     path: /var/lib/etcd/{{ inventory_hostname }}.etcd
     state: "{{ item }}"
-    owner: root
-    group: root
+    owner: etcd
+    group: etcd
     mode: 0700
   with_items:
     - absent
@@ -11,6 +22,7 @@
   tags: [ add_service ]
 
 - name: create a etcd service
+  become: true
   copy:
     src: etcd.service
     dest: /etc/systemd/system/etcd.service
@@ -21,68 +33,76 @@
   tags: [ add_service ]
 
 - name: create directory for etcd configuration
+  become: true
   file:
     path: "{{ item }}"
     state: directory
-    owner: root
-    group: root
+    owner: etcd
+    group: etcd
     mode: 0755
   with_items:
-      - /etc/etcd
-      - /etc/etcd/ssl
+    - /etc/etcd
+    - /etc/etcd/ssl
   tags: [ add_service ]
 
 - name: copy over the CA certificate
+  become: true
   copy:
     src: ./../artifacts/ca.crt
     remote_src: False
     dest: /etc/etcd/ssl/ca.crt
-    owner: root
-    group: root
+    owner: etcd
+    group: etcd
     mode: 0644
   tags: [ copy_ca ]
 
 - name: copy over the `etcd` member certificate
+  become: true
   copy:
     src: ./../artifacts/{{inventory_hostname}}.crt
     remote_src: False
     dest: /etc/etcd/ssl/server.crt
-    owner: root
-    group: root
+    owner: etcd
+    group: etcd
     mode: 0644
   tags: [ copy_ca ]
 
 - name: copy over the `etcd` member key
+  become: true
   copy:
     src: ./../artifacts/{{inventory_hostname}}.key
     remote_src: False
     dest: /etc/etcd/ssl/server.key
-    owner: root
-    group: root
+    owner: etcd
+    group: etcd
     mode: 0600
   tags: [ copy_ca ]
 
 - name: create configuration file for etcd
+  become: true
   template:
     src: etcd.conf.yaml.j2
     dest: /etc/etcd/etcd.conf.yaml
-    owner: root
-    group: root
+    owner: etcd
+    group: etcd
     mode: 0600
   tags: [ add_service ]
 
 - name: enable the etcd service
+  become: true
   systemd:
     name: etcd
     enabled: yes
   tags: [ enable_etcd_service ]
 
 - name: daemon reload
+  become: true
   systemd:
     daemon_reload: yes
   tags: [ daemon_reload ]
 
 - name: Make sure a service is running
+  become: true
   systemd: 
     state: started 
     name: etcd

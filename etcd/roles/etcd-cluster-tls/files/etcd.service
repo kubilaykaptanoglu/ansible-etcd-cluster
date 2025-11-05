@@ -3,6 +3,7 @@ Description=etcd distributed reliable key-value store
 
 [Service]
 Type=notify
+User=etcd
 ExecStart=/usr/local/bin/etcd --config-file /etc/etcd/etcd.conf.yaml
 Restart=on-failure
 RestartSec=5

@@ -1,28 +1,33 @@
+---
 - name: download etcd binary tar.gz file
+  become: true
   get_url:
     url: https://github.com/etcd-io/etcd/releases/download/{{ ETCD_VER }}/etcd-{{ ETCD_VER }}-linux-amd64.tar.gz
-    dest: /home/etcd-{{ ETCD_VER }}-linux-amd64.tar.gz
+    dest: /opt/etcd-{{ ETCD_VER }}-linux-amd64.tar.gz
     timeout: 250
     backup: yes
     mode: 0440
   tags: [ get_etcd ]
 
 - name: extract etcd .tar.gz file
+  become: true
   unarchive:
-    src: /home/etcd-{{ ETCD_VER }}-linux-amd64.tar.gz
-    dest: /home
+    src: /opt/etcd-{{ ETCD_VER }}-linux-amd64.tar.gz
+    dest: /opt
     remote_src: yes
   tags: [ get_etcd ]
 
 - name: stat etcd
+  become: true
   stat: 
-    path: /home/etcd-{{ ETCD_VER }}-linux-amd64/etcd
+    path: /opt/etcd-{{ ETCD_VER }}-linux-amd64/etcd
   register: etcd_file_stat
   tags: [ install_etcd ]
 
 - name: move etcd and etcdctl to /usr/local/bin/
+  become: true
   copy:
-    src: /home/etcd-{{ ETCD_VER }}-linux-amd64/{{ item.name }}
+    src: /opt/etcd-{{ ETCD_VER }}-linux-amd64/{{ item.name }}
     dest: /usr/local/bin/{{ item.name }}
     mode: 0777
     remote_src: yes
@@ -32,9 +37,10 @@
   when: etcd_file_stat.stat.exists
   tags: [ install_etcd ]
 
-- name: remove etcd donload file directory and .tar.gz in `/home` directory
+- name: remove etcd donload file directory and .tar.gz in `/opt` directory
+  become: true
   file:
-    path: '/home/{{ item }}'
+    path: '/opt/{{ item }}'
     state: absent
   loop:
     - etcd-{{ ETCD_VER }}-linux-amd64

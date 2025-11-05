@@ -2,5 +2,5 @@
   gather_facts: true
   become: False
   tasks:
-    - include: tasks/pre-readiness.yml
-    - include: tasks/generate_ca.yml
+    - import_tasks: tasks/pre-readiness.yml
+    - import_tasks: tasks/generate_ca.yml
